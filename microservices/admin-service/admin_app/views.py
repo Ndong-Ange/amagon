@@ -1,8 +1,9 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
-from .models import AdminUser
+from .models import AdminUser, SellerActivity
 import jwt
 from django.conf import settings
 
@@ -39,3 +40,26 @@ def create_default_admin(request):
         )
         return Response({'message': 'Default admin created'})
     return Response({'message': 'Default admin already exists'})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_admin_info(request):
+    admin = AdminUser.objects.get(id=request.user.id)
+    return Response({
+        'id': str(admin.id),
+        'email': admin.email,
+        'name': admin.name,
+        'role': admin.role
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_seller_activities(request):
+    activities = SellerActivity.objects.all().order_by('-created_at')[:50]
+    return Response([{
+        'id': str(activity.id),
+        'seller_id': str(activity.seller_id),
+        'action_type': activity.action_type,
+        'description': activity.description,
+        'created_at': activity.created_at
+    } for activity in activities])
