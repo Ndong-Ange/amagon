@@ -63,3 +63,46 @@ def get_seller_activities(request):
         'description': activity.description,
         'created_at': activity.created_at
     } for activity in activities])
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def manage_seller(request, seller_id):
+    if request.method == 'GET':
+        # Get seller details from seller service
+        try:
+            seller = get_seller_from_service(seller_id)
+            return Response(seller)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    elif request.method == 'PUT':
+        try:
+            # Update seller details in seller service
+            updated_seller = update_seller_in_service(seller_id, request.data)
+            
+            # Log the activity
+            SellerActivity.objects.create(
+                seller_id=seller_id,
+                action_type='update',
+                description=f'Seller information updated by admin {request.user.id}'
+            )
+            
+            return Response(updated_seller)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+def get_seller_from_service(seller_id):
+    # Implementation to fetch seller details from seller service
+    # This would typically involve making an HTTP request to the seller service
+    pass
+
+def update_seller_in_service(seller_id, data):
+    # Implementation to update seller details in seller service
+    # This would typically involve making an HTTP request to the seller service
+    pass
