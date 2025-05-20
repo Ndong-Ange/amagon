@@ -11,6 +11,8 @@ import RegisterPage from './pages/RegisterPage';
 import AccountPage from './pages/AccountPage';
 import OrdersPage from './pages/OrdersPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminLoginPage from './pages/admin/LoginPage';
+import AdminDashboardPage from './pages/admin/DashboardPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -31,6 +33,8 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>
