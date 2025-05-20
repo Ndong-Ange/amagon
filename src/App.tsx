@@ -10,38 +10,41 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AccountPage from './pages/AccountPage';
 import OrdersPage from './pages/OrdersPage';
-import NotFoundPage from './pages/NotFoundPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
+import NotFoundPage from './pages/NotFoundPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Router>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/account" element={<AccountPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </CartProvider>
+      <AdminAuthProvider>
+        <CartProvider>
+          <Router>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </CartProvider>
+      </AdminAuthProvider>
     </AuthProvider>
   );
 }
