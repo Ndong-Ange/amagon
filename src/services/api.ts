@@ -12,45 +12,79 @@ export class ApiService {
       ...options,
     };
 
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+      const response = await fetch(url, config);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error(`API request failed for ${endpoint}:`, error);
+      throw error;
     }
-    
-    return response.json();
   }
 
   // Products
   static async getProducts(params?: { category?: string; search?: string }) {
-    const searchParams = new URLSearchParams(params).toString();
-    return this.request(`/products/?${searchParams}`);
+    try {
+      const searchParams = new URLSearchParams();
+      if (params?.category) searchParams.append('category', params.category);
+      if (params?.search) searchParams.append('search', params.search);
+      
+      const queryString = searchParams.toString();
+      return this.request(`/products/${queryString ? '?' + queryString : ''}`);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      throw error;
+    }
   }
 
   static async getProduct(id: string) {
-    return this.request(`/products/${id}/`);
+    try {
+      return this.request(`/products/${id}/`);
+    } catch (error) {
+      console.error(`Failed to fetch product ${id}:`, error);
+      throw error;
+    }
   }
 
   // Orders
   static async createOrder(orderData: any) {
-    return this.request('/orders/create/', {
-      method: 'POST',
-      body: JSON.stringify(orderData),
-    });
+    try {
+      return this.request('/orders/create/', {
+        method: 'POST',
+        body: JSON.stringify(orderData),
+      });
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      throw error;
+    }
   }
 
   // Auth
   static async login(email: string, password: string) {
-    return this.request('/auth/login/', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      return this.request('/auth/login/', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   }
 
   static async register(userData: any) {
-    return this.request('/auth/register/', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
+    try {
+      return this.request('/auth/register/', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+      });
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   }
 }

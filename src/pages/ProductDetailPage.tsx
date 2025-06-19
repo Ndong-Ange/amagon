@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, ChevronDown, ChevronUp, Check, Truck, ShieldCheck, Info } from 'lucide-react';
-import { mockProducts } from '../data/mockData';
+import { Star, ChevronDown, ChevronUp, Check, Truck, ShieldCheck, MapPin } from 'lucide-react';
+import { useProduct } from '../hooks/useProduct';
 import { useCart } from '../context/CartContext';
 import ProductGrid from '../components/home/ProductGrid';
 
@@ -12,14 +12,59 @@ const ProductDetailPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedSection, setExpandedSection] = useState<string | null>('description');
   
-  // Find the product by ID
-  const product = mockProducts.find(p => p.id === id);
+  const { product, loading, error } = useProduct(id || '');
   
-  if (!product) {
+  if (loading) {
+    return (
+      <div className="container-custom py-12">
+        <div className="animate-pulse">
+          {/* Breadcrumb skeleton */}
+          <div className="flex text-sm mb-6">
+            <div className="h-4 bg-gray-300 rounded w-20"></div>
+            <span className="mx-2">/</span>
+            <div className="h-4 bg-gray-300 rounded w-24"></div>
+            <span className="mx-2">/</span>
+            <div className="h-4 bg-gray-300 rounded w-32"></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Image skeleton */}
+            <div className="col-span-1">
+              <div className="bg-gray-300 h-96 rounded"></div>
+            </div>
+
+            {/* Product info skeleton */}
+            <div className="col-span-1">
+              <div className="h-8 bg-gray-300 rounded mb-4"></div>
+              <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+              <div className="h-10 bg-gray-300 rounded w-1/2 mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-300 rounded"></div>
+                <div className="h-4 bg-gray-300 rounded w-5/6"></div>
+                <div className="h-4 bg-gray-300 rounded w-4/6"></div>
+              </div>
+            </div>
+
+            {/* Purchase box skeleton */}
+            <div className="col-span-1">
+              <div className="border border-gray-200 rounded p-4">
+                <div className="h-8 bg-gray-300 rounded mb-4"></div>
+                <div className="h-6 bg-gray-300 rounded mb-4"></div>
+                <div className="h-10 bg-gray-300 rounded mb-2"></div>
+                <div className="h-10 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="container-custom py-12 text-center">
         <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <p className="mb-6">Sorry, the product you are looking for doesn't exist.</p>
+        <p className="mb-6">{error || 'Sorry, the product you are looking for doesn\'t exist.'}</p>
         <Link to="/" className="btn btn-primary">
           Return to Home
         </Link>
@@ -28,12 +73,14 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.image
-    });
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image
+      });
+    }
   };
 
   const toggleSection = (section: string) => {
@@ -44,8 +91,8 @@ const ProductDetailPage: React.FC = () => {
     }
   };
 
-  // Mock data for product images
-  const productImages = [
+  // Use product images or fallback to default images
+  const productImages = product.images && product.images.length > 0 ? product.images : [
     product.image,
     'https://images.pexels.com/photos/1294886/pexels-photo-1294886.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
     'https://images.pexels.com/photos/1667088/pexels-photo-1667088.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -80,7 +127,9 @@ const ProductDetailPage: React.FC = () => {
         <nav className="flex text-sm mb-6">
           <Link to="/" className="text-amazon-teal hover:underline">Home</Link>
           <span className="mx-2">/</span>
-          <Link to="/category/electronics" className="text-amazon-teal hover:underline">Electronics</Link>
+          <Link to={`/category/${product.category || 'electronics'}`} className="text-amazon-teal hover:underline">
+            {product.category || 'Electronics'}
+          </Link>
           <span className="mx-2">/</span>
           <span className="text-gray-500 truncate">{product.title}</span>
         </nav>
@@ -170,6 +219,7 @@ const ProductDetailPage: React.FC = () => {
               
               {expandedSection === 'description' && (
                 <div className="py-3 text-sm">
+                  <p className="mb-4">{product.description}</p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>High-performance product with advanced features for optimal user experience</li>
                     <li>Energy efficient design with long battery life</li>
@@ -361,7 +411,7 @@ const ProductDetailPage: React.FC = () => {
         {/* Similar products */}
         <div className="my-8">
           <h2 className="text-xl font-bold mb-4">Products related to this item</h2>
-          <ProductGrid limit={6} />
+          <ProductGrid title="" limit={6} />
         </div>
       </div>
     </div>
