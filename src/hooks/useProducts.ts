@@ -21,6 +21,13 @@ export const useProducts = (category?: string, search?: string) => {
       try {
         setLoading(true);
         setError(null);
+        
+        // First check if API is accessible
+        const isApiHealthy = await ApiService.healthCheck();
+        if (!isApiHealthy) {
+          throw new Error('API Gateway is not accessible. Please ensure the backend services are running by executing run_project.py');
+        }
+        
         const data = await ApiService.getProducts({ category, search });
         
         // Transform API data to frontend format
@@ -36,7 +43,12 @@ export const useProducts = (category?: string, search?: string) => {
         
         setProducts(transformedProducts);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch products');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products';
+        setError(errorMessage);
+        console.error('Products fetch error:', errorMessage);
+        
+        // Fallback to empty array to prevent UI crashes
+        setProducts([]);
       } finally {
         setLoading(false);
       }

@@ -16,11 +16,20 @@ export class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
       }
       
-      return response.json();
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      } else {
+        return response.text();
+      }
     } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Unable to connect to API server at ${API_BASE_URL}. Please ensure the API Gateway is running on port 8000.`);
+      }
       console.error(`API request failed for ${endpoint}:`, error);
       throw error;
     }
@@ -85,6 +94,19 @@ export class ApiService {
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
+    }
+  }
+
+  // Health check method to verify API connectivity
+  static async healthCheck() {
+    try {
+      const response = await fetch(`${API_BASE_URL.replace('/api', '')}/admin/`, {
+        method: 'HEAD',
+        mode: 'no-cors'
+      });
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 }
